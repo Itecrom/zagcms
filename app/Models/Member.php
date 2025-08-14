@@ -27,11 +27,14 @@ class Member extends Model
         'deceased',
     ];
 
-    public function homecell() {
-        return $this->belongsTo(Homecell::class);
-    }
+public function ministry()
+{
+    return $this->belongsTo(Ministry::class);
+}
 
-    public function ministry() {
-        return $this->belongsTo(Ministry::class);
-    }
+public function homecell()
+{
+    return $this->belongsTo(Homecell::class);
+}
+
 }

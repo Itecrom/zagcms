@@ -1,43 +1,77 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-6 bg-white shadow rounded">
-    <h2 class="text-xl font-bold mb-4">Add New Member</h2>
+<div class="p-6 max-w-3xl mx-auto bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">{{ isset($member) ? 'Edit Member' : 'Add Member' }}</h1>
 
-    @if($errors->any())
-        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('members.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ isset($member) ? route('members.update', $member->id) : route('members.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="grid grid-cols-2 gap-4">
-            <input type="text" name="name" placeholder="First Name" class="border p-2 rounded" required>
-            <input type="text" name="surname" placeholder="Surname" class="border p-2 rounded" required>
-            <input type="date" name="dob" class="border p-2 rounded" required>
-            <input type="text" name="home_of_origin" placeholder="Home of Origin" class="border p-2 rounded">
-            <input type="text" name="residential_home" placeholder="Residential Home" class="border p-2 rounded">
-            <select name="homecell_id" class="border p-2 rounded" required>
-                @foreach($homecells as $homecell)
-                    <option value="{{ $homecell->id }}">{{ $homecell->name }}</option>
-                @endforeach
-            </select>
-            <select name="ministry_id" class="border p-2 rounded" required>
-                @foreach($ministries as $ministry)
-                    <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
-                @endforeach
-            </select>
-            <input type="file" name="picture" class="border p-2 rounded">
+        @if(isset($member))
+            @method('PUT')
+        @endif
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-medium text-gray-700">Name</label>
+                <input type="text" name="name" value="{{ old('name', $member->name ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Surname</label>
+                <input type="text" name="surname" value="{{ old('surname', $member->surname ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Date of Birth</label>
+                <input type="date" name="dob" value="{{ old('dob', $member->dob ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Phone</label>
+                <input type="text" name="phone" value="{{ old('phone', $member->phone ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Homecell</label>
+                <select name="homecell_id" class="mt-1 block w-full border-gray-300 rounded" required>
+                    <option value="">Select Homecell</option>
+                    @foreach($homecells as $hc)
+                        <option value="{{ $hc->id }}" {{ (old('homecell_id', $member->homecell_id ?? '') == $hc->id) ? 'selected' : '' }}>{{ $hc->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Ministry</label>
+                <select name="ministry_id" class="mt-1 block w-full border-gray-300 rounded" required>
+                    <option value="">Select Ministry</option>
+                    @foreach($ministries as $min)
+                        <option value="{{ $min->id }}" {{ (old('ministry_id', $member->ministry_id ?? '') == $min->id) ? 'selected' : '' }}>{{ $min->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Picture</label>
+                <input type="file" name="picture" class="mt-1 block w-full">
+                @if(isset($member) && $member->picture)
+                    <img src="{{ asset('storage/'.$member->picture) }}" class="mt-2 h-20 w-20 object-cover rounded">
+                @endif
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Marital Status</label>
+                <input type="text" name="marital_status" value="{{ old('marital_status', $member->marital_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
+            </div>
+            <div>
+                <label class="block font-medium text-gray-700">Employment Status</label>
+                <input type="text" name="employment_status" value="{{ old('employment_status', $member->employment_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
+            </div>
+            <div class="col-span-2 flex items-center gap-4">
+                <label><input type="checkbox" name="active" {{ old('active', $member->active ?? false) ? 'checked' : '' }}> Active</label>
+                <label><input type="checkbox" name="transferred" {{ old('transferred', $member->transferred ?? false) ? 'checked' : '' }}> Transferred</label>
+                <label><input type="checkbox" name="deceased" {{ old('deceased', $member->deceased ?? false) ? 'checked' : '' }}> Deceased</label>
+            </div>
         </div>
 
-        <button type="submit" class="mt-4 bg-[#D1A300] text-white px-4 py-2 rounded hover:bg-[#160285]">
-            Save Member
-        </button>
+        <div class="mt-4">
+            <button type="submit" class="px-4 py-2 bg-#D1A300 text-white rounded hover:bg-yellow-500">
+                {{ isset($member) ? 'Update Member' : 'Add Member' }}
+            </button>
+        </div>
     </form>
 </div>
 @endsection
