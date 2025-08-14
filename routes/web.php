@@ -36,6 +36,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('members', MemberController::class)->only(['index', 'show']);
     });
 
+    Route::middleware(['auth'])->group(function () {
+    Route::resource('members', MemberController::class);
+});
+
+
     // Ministry Leader routes
     Route::middleware('role:ministry_leader')->group(function () {
         Route::resource('ministries', MinistryController::class)->only(['index', 'show']);
