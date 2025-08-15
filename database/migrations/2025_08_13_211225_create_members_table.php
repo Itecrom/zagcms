@@ -24,9 +24,9 @@ return new class extends Migration
     $table->string('marital_status')->nullable();
     $table->string('employment_status')->nullable();
     $table->string('phone')->nullable();
-    $table->boolean('active')->default(true);
-    $table->boolean('transferred')->default(false);
-    $table->boolean('deceased')->default(false);
+    $table->boolean('active')->default(false)->change();
+    $table->boolean('transferred')->default(false)->change();
+    $table->boolean('deceased')->default(false)->change();
     $table->timestamps();
         });
     }

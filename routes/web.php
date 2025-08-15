@@ -16,11 +16,18 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\HomecellController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MemberExportController;
 
 
 
 Route::resource('users', UserController::class)->middleware('auth');
 Route::resource('ministries', MinistryController::class);
+Route::resource('members', MemberController::class);
+Route::resource('homecells', HomecellController::class)->middleware('auth');
+Route::get('/export/members/excel', [MemberExportController::class, 'exportExcel'])->name('export.members.excel');
+Route::get('/export/members/pdf', [MemberExportController::class, 'exportPDF'])->name('export.members.pdf');
+
+
 
 
 /*
@@ -68,11 +75,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Ministries CRUD (Super Admin will see via Blade condition)
     Route::resource('ministries', MinistryController::class);
+    
 
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
 
     // Email Verification
     Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
@@ -90,4 +99,5 @@ Route::middleware(['auth'])->group(function () {
 
     // Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
 });

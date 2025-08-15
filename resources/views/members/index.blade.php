@@ -3,8 +3,6 @@
 @section('content')
 <div class="flex min-h-screen bg-gray-100">
 
-
-    <!-- Main Content -->
     <div class="flex-1 flex flex-col">
 
         <!-- Header -->
@@ -19,25 +17,62 @@
             </div>
         </header>
 
-        <!-- Dashboard Cards -->
         <main class="flex-1 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+            <!-- Filters -->
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form action="{{ route('members.index') }}" method="GET" class="flex gap-2 items-center">
+                    <select name="homecell_id" class="border rounded px-3 py-2">
+                        <option value="">All Homecells</option>
+                        @foreach($homecells as $hc)
+                            <option value="{{ $hc->id }}" {{ request('homecell_id') == $hc->id ? 'selected' : '' }}>
+                                {{ $hc->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="ministry_id" class="border rounded px-3 py-2">
+                        <option value="">All Ministries</option>
+                        @foreach($ministries as $m)
+                            <option value="{{ $m->id }}" {{ request('ministry_id') == $m->id ? 'selected' : '' }}>
+                                {{ $m->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="status" class="border rounded px-3 py-2">
+                        <option value="">All Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="transferred" {{ request('status') == 'transferred' ? 'selected' : '' }}>Transferred</option>
+                        <option value="deceased" {{ request('status') == 'deceased' ? 'selected' : '' }}>Deceased</option>
+                    </select>
+
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500">Filter</button>
+                </form>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-[#160285] text-white rounded-lg p-6 shadow flex flex-col items-center">
-                    <div class="text-xl font-bold">{{ $members->count() }}</div>
+                    <div class="text-2xl font-bold">{{ $members->count() }}</div>
                     <div>Total Members</div>
                 </div>
-                <div class="bg-[#D1A300] text-[#160285] rounded-lg p-6 shadow flex flex-col items-center">
-                    <div class="text-xl font-bold">{{ $members->where('active', true)->count() }}</div>
+                <div class="bg-[#16A34A] text-white rounded-lg p-6 shadow flex flex-col items-center">
+                    <div class="text-2xl font-bold">{{ $members->where('active', true)->count() }}</div>
                     <div>Active Members</div>
                 </div>
-                <div class="bg-[#160285] text-white rounded-lg p-6 shadow flex flex-col items-center">
-                    <div class="text-xl font-bold">{{ $members->where('deceased', true)->count() }}</div>
+                <div class="bg-[#D97706] text-white rounded-lg p-6 shadow flex flex-col items-center">
+                    <div class="text-2xl font-bold">{{ $members->where('transferred', true)->count() }}</div>
+                    <div>Transferred Members</div>
+                </div>
+                <div class="bg-[#DC2626] text-white rounded-lg p-6 shadow flex flex-col items-center">
+                    <div class="text-2xl font-bold">{{ $members->where('deceased', true)->count() }}</div>
                     <div>Deceased Members</div>
                 </div>
             </div>
 
             <!-- Members Table -->
-            <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="bg-white shadow rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-[#160285] text-white">
                         <tr>
@@ -51,24 +86,26 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($members as $member)
                         <tr>
-                            <td class="px-6 py-4 text-sm">{{ $member->name }} {{ $member->surname }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $member->homecell->name }}</td>
-                            <td class="px-6 py-4 text-sm">{{ $member->ministry->name }}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $member->name }} {{ $member->surname }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ optional($member->homecell)->name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ optional($member->ministry)->name }}</td>
                             <td class="px-6 py-4 text-sm">
                                 @if($member->active)
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                                @elseif($member->deceased)
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Deceased</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
                                 @elseif($member->transferred)
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Transferred</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Transferred</span>
+                                @elseif($member->deceased)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Deceased</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Unknown</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm flex gap-2">
                                 @can('update', $member)
-                                    <a href="{{ route('members.edit', $member->id) }}" class="text-indigo-600 hover:underline">Edit</a>
+                                    <a href="{{ route('members.edit', $member) }}" class="text-indigo-600 hover:underline">Edit</a>
                                 @endcan
                                 @can('delete', $member)
-                                    <form action="{{ route('members.destroy', $member->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                    <form action="{{ route('members.destroy', $member) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:underline">Delete</button>
@@ -81,36 +118,13 @@
                 </table>
             </div>
 
-@can('create', App\Models\Member::class)
-    <a href="{{ route('members.create') }}" class="btn btn-primary">Add Member</a>
-@endcan
-
-<table class="min-w-full mt-4">
-    <!-- ... -->
-    @foreach($members as $member)
-        <tr>
-            <td>{{ $member->name }} {{ $member->surname }}</td>
-            <td>{{ optional($member->homecell)->name }}</td>
-            <td>{{ optional($member->ministry)->name }}</td>
-            <td class="text-right">
-                @can('update', $member)
-                    <a href="{{ route('members.edit', $member) }}" class="link">Edit</a>
-                @endcan
-                @can('delete', $member)
-                    <form action="{{ route('members.destroy', $member) }}" method="POST" class="inline">
-                        @csrf @method('DELETE')
-                        <button class="text-red-600 ml-2" onclick="return confirm('Delete this member?')">Delete</button>
-                    </form>
-                @endcan
-            </td>
-        </tr>
-    @endforeach
-</table>
-
+            <!-- Pagination -->
+            <div class="mt-4">
+                {{ $members->links() }}
+            </div>
 
         </main>
 
-        <!-- Footer -->
         <footer class="bg-gray-200 text-center py-4 mt-auto">
             <p class="text-gray-700">&copy; ZAG MEDIA TEAM, Version 1.0</p>
         </footer>

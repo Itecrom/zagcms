@@ -16,24 +16,49 @@ class MemberController extends Controller
     }
 
     /**
-     * Display a listing of members.
+     * Display a listing of members with optional filters.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
         $query = Member::with(['homecell', 'ministry']);
 
+        // Role-based filters
         if ($user->isHomecellPastor()) {
             $query->where('homecell_id', $user->homecell_id);
         } elseif ($user->isMinistryLeader()) {
             $query->where('ministry_id', $user->ministry_id);
         }
-        // super_admin sees all
 
-        $members = $query->latest()->paginate(12);
+        // Apply query filters from request
+        if ($request->filled('homecell_id')) {
+            $query->where('homecell_id', $request->homecell_id);
+        }
 
-        return view('members.index', compact('members'));
+        if ($request->filled('ministry_id')) {
+            $query->where('ministry_id', $request->ministry_id);
+        }
+
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'active':
+                    $query->where('active', true);
+                    break;
+                case 'transferred':
+                    $query->where('transferred', true);
+                    break;
+                case 'deceased':
+                    $query->where('deceased', true);
+                    break;
+            }
+        }
+
+        $members = $query->distinct()->latest()->paginate(12);
+        $homecells = Homecell::all();
+        $ministries = Ministry::all();
+
+        return view('members.index', compact('members', 'homecells', 'ministries'));
     }
 
     /**
@@ -52,10 +77,6 @@ class MemberController extends Controller
             ->get();
 
         return view('members.create', compact('homecells', 'ministries'));
-
-        $ministries = Ministry::all(); return view('members.create', compact('ministries'));
-
-        $ministries = Ministry::all(); return view('members.edit', compact('member', 'ministries'));
     }
 
     /**
@@ -63,41 +84,36 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user();
-
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'dob' => 'required|date',
-            'home_of_origin' => 'nullable|string|max:255',
-            'residential_home' => 'nullable|string|max:255',
-            'homecell_id' => 'required|exists:homecells,id',
-            'ministry_id' => 'nullable|exists:ministries,id',
-            'picture' => 'nullable|image|max:2048',
-            'marital_status' => 'nullable|string|max:255',
-            'employment_status' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:30',
-            'active' => 'sometimes|boolean',
-            'transferred' => 'sometimes|boolean',
-            'deceased' => 'sometimes|boolean',
+            'name'              => 'required|string|max:255',
+            'surname'           => 'required|string|max:255',
+            'dob'               => 'required|date',
+            'phone'             => 'nullable|string|max:20',
+            'home_of_origin'    => 'nullable|string|max:255',
+            'residential_home'  => 'nullable|string|max:255',
+            'homecell_id'       => 'required|exists:homecells,id',
+            'ministry_id'       => 'required|exists:ministries,id',
+            'marital_status'    => 'nullable|string|max:50',
+            'employment_status' => 'nullable|string|max:50',
+            'active'            => 'sometimes|boolean',
+            'transferred'       => 'sometimes|boolean',
+            'deceased'          => 'sometimes|boolean',
+            'picture'           => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Enforce user role constraints
-        if ($user->isHomecellPastor()) {
-            $data['homecell_id'] = $user->homecell_id;
-        }
-        if ($user->isMinistryLeader()) {
-            $data['ministry_id'] = $user->ministry_id;
-        }
+        // Ensure checkboxes are properly handled
+        $data['active']      = $request->has('active');
+        $data['transferred'] = $request->has('transferred');
+        $data['deceased']    = $request->has('deceased');
 
+        // Handle image upload
         if ($request->hasFile('picture')) {
             $data['picture'] = $request->file('picture')->store('members', 'public');
         }
 
-        $member = Member::create($data);
-        $this->authorize('view', $member);
+        Member::create($data);
 
-        return redirect()->route('members.index')->with('success', 'Member created successfully!');
+        return redirect()->route('members.index')->with('success', 'Member added successfully.');
     }
 
     /**
@@ -142,6 +158,7 @@ class MemberController extends Controller
             'deceased' => 'sometimes|boolean',
         ]);
 
+        // Role-based restriction
         if ($user->isHomecellPastor()) {
             $data['homecell_id'] = $user->homecell_id;
         }
@@ -149,6 +166,12 @@ class MemberController extends Controller
             $data['ministry_id'] = $user->ministry_id;
         }
 
+        // Ensure checkboxes are properly handled
+        $data['active']      = $request->has('active');
+        $data['transferred'] = $request->has('transferred');
+        $data['deceased']    = $request->has('deceased');
+
+        // Handle image upload
         if ($request->hasFile('picture')) {
             $data['picture'] = $request->file('picture')->store('members', 'public');
         }

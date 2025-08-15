@@ -1,81 +1,118 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-3xl mx-auto bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">{{ isset($member) ? 'Edit Member' : 'Add Member' }}</h1>
+<div class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-6">Add New Member</h1>
 
-    <form action="{{ isset($member) ? route('members.update', $member->id) : route('members.store') }}" method="POST" enctype="multipart/form-data">
+    @if($errors->any())
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            <ul class="list-disc pl-5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('members.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
-        @if(isset($member))
-            @method('PUT')
-        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block font-medium text-gray-700">Name</label>
-                <input type="text" name="name" value="{{ old('name', $member->name ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
+                <label class="block font-semibold mb-1">First Name</label>
+                <input type="text" name="name" value="{{ old('name') }}" class="w-full border rounded px-3 py-2" required>
             </div>
             <div>
-                <label class="block font-medium text-gray-700">Surname</label>
-                <input type="text" name="surname" value="{{ old('surname', $member->surname ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
+                <label class="block font-semibold mb-1">Surname</label>
+                <input type="text" name="surname" value="{{ old('surname') }}" class="w-full border rounded px-3 py-2" required>
             </div>
-            <div>
-                <label class="block font-medium text-gray-700">Date of Birth</label>
-                <input type="date" name="dob" value="{{ old('dob', $member->dob ?? '') }}" class="mt-1 block w-full border-gray-300 rounded" required>
-            </div>
-            <div>
-                <label class="block font-medium text-gray-700">Phone</label>
-                <input type="text" name="phone" value="{{ old('phone', $member->phone ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
-            </div>
+        </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block font-medium text-gray-700">Homecell</label>
-                <select name="homecell_id" class="mt-1 block w-full border-gray-300 rounded" required>
+                <label class="block font-semibold mb-1">Date of Birth</label>
+                <input type="date" name="dob" value="{{ old('dob') }}" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Phone</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" class="w-full border rounded px-3 py-2">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+        <label class="block font-semibold mb-1">Home of Origin</label>
+        <input type="text" name="home_of_origin" value="{{ old('home_of_origin') }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+        <label class="block font-semibold mb-1">Residential Home</label>
+        <input type="text" name="residential_home" value="{{ old('residential_home') }}" class="w-full border rounded px-3 py-2">
+    </div>
+</div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-semibold mb-1">Homecell</label>
+                <select name="homecell_id" class="w-full border rounded px-3 py-2" required>
                     <option value="">Select Homecell</option>
                     @foreach($homecells as $hc)
-                        <option value="{{ $hc->id }}" {{ (old('homecell_id', $member->homecell_id ?? '') == $hc->id) ? 'selected' : '' }}>{{ $hc->name }}</option>
+                        <option value="{{ $hc->id }}" {{ old('homecell_id') == $hc->id ? 'selected' : '' }}>
+                            {{ $hc->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
-
             <div>
-                <label class="block font-medium text-gray-700">Ministry</label>
-                <select name="ministry_id" class="mt-1 block w-full border-gray-300 rounded" required>
+                <label class="block font-semibold mb-1">Ministry</label>
+                <select name="ministry_id" class="w-full border rounded px-3 py-2" required>
                     <option value="">Select Ministry</option>
-                    @foreach($ministries as $min)
-                        <option value="{{ $min->id }}" {{ (old('ministry_id', $member->ministry_id ?? '') == $min->id) ? 'selected' : '' }}>{{ $min->name }}</option>
+                    @foreach($ministries as $m)
+                        <option value="{{ $m->id }}" {{ old('ministry_id') == $m->id ? 'selected' : '' }}>
+                            {{ $m->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
+        </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block font-medium text-gray-700">Picture</label>
-                <input type="file" name="picture" class="mt-1 block w-full">
-                @if(isset($member) && $member->picture)
-                    <img src="{{ asset('storage/'.$member->picture) }}" class="mt-2 h-20 w-20 object-cover rounded">
-                @endif
+                <label class="block font-semibold mb-1">Marital Status</label>
+                <input type="text" name="marital_status" value="{{ old('marital_status') }}" class="w-full border rounded px-3 py-2">
             </div>
             <div>
-                <label class="block font-medium text-gray-700">Marital Status</label>
-                <input type="text" name="marital_status" value="{{ old('marital_status', $member->marital_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
-            </div>
-            <div>
-                <label class="block font-medium text-gray-700">Employment Status</label>
-                <input type="text" name="employment_status" value="{{ old('employment_status', $member->employment_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
-            </div>
-
-            <div class="col-span-2 flex items-center gap-4">
-                <label><input type="checkbox" name="active" {{ old('active', $member->active ?? false) ? 'checked' : '' }}> Active</label>
-                <label><input type="checkbox" name="transferred" {{ old('transferred', $member->transferred ?? false) ? 'checked' : '' }}> Transferred</label>
-                <label><input type="checkbox" name="deceased" {{ old('deceased', $member->deceased ?? false) ? 'checked' : '' }}> Deceased</label>
+                <label class="block font-semibold mb-1">Employment Status</label>
+                <input type="text" name="employment_status" value="{{ old('employment_status') }}" class="w-full border rounded px-3 py-2">
             </div>
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-500">
-                {{ isset($member) ? 'Update Member' : 'Add Member' }}
-            </button>
+        <div>
+            <label class="block font-semibold mb-1">Profile Picture</label>
+            <input type="file" name="picture" class="w-full">
         </div>
+
+        {{-- Boolean fields with hidden inputs to ensure true/false values --}}
+        <div class="flex space-x-6 items-center">
+            <label class="flex items-center space-x-2">
+                <input type="hidden" name="active" value="0">
+                <input type="checkbox" name="active" value="1" {{ old('active') ? 'checked' : '' }} class="form-checkbox">
+                <span>Active</span>
+            </label>
+            <label class="flex items-center space-x-2">
+                <input type="hidden" name="transferred" value="0">
+                <input type="checkbox" name="transferred" value="1" {{ old('transferred') ? 'checked' : '' }} class="form-checkbox">
+                <span>Transferred</span>
+            </label>
+            <label class="flex items-center space-x-2">
+                <input type="hidden" name="deceased" value="0">
+                <input type="checkbox" name="deceased" value="1" {{ old('deceased') ? 'checked' : '' }} class="form-checkbox">
+                <span>Deceased</span>
+            </label>
+        </div>
+
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500">
+            Add Member
+        </button>
     </form>
 </div>
 @endsection

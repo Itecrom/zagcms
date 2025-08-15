@@ -9,15 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('homecells', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('pastor')->nullable();
-            $table->timestamps();
-        });
-    }
+public function up(): void
+{
+    Schema::create('homecells', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('leader')->nullable(); // optional: assign a leader
+        $table->text('description')->nullable();
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
