@@ -27,6 +27,7 @@
                 <label class="block font-medium text-gray-700">Phone</label>
                 <input type="text" name="phone" value="{{ old('phone', $member->phone ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
             </div>
+
             <div>
                 <label class="block font-medium text-gray-700">Homecell</label>
                 <select name="homecell_id" class="mt-1 block w-full border-gray-300 rounded" required>
@@ -36,6 +37,7 @@
                     @endforeach
                 </select>
             </div>
+
             <div>
                 <label class="block font-medium text-gray-700">Ministry</label>
                 <select name="ministry_id" class="mt-1 block w-full border-gray-300 rounded" required>
@@ -45,6 +47,7 @@
                     @endforeach
                 </select>
             </div>
+
             <div>
                 <label class="block font-medium text-gray-700">Picture</label>
                 <input type="file" name="picture" class="mt-1 block w-full">
@@ -60,6 +63,7 @@
                 <label class="block font-medium text-gray-700">Employment Status</label>
                 <input type="text" name="employment_status" value="{{ old('employment_status', $member->employment_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
             </div>
+
             <div class="col-span-2 flex items-center gap-4">
                 <label><input type="checkbox" name="active" {{ old('active', $member->active ?? false) ? 'checked' : '' }}> Active</label>
                 <label><input type="checkbox" name="transferred" {{ old('transferred', $member->transferred ?? false) ? 'checked' : '' }}> Transferred</label>
@@ -68,7 +72,7 @@
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="px-4 py-2 bg-#D1A300 text-white rounded hover:bg-yellow-500">
+            <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-500">
                 {{ isset($member) ? 'Update Member' : 'Add Member' }}
             </button>
         </div>

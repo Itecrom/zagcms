@@ -3,8 +3,6 @@
 @section('content')
 <div class="flex min-h-screen bg-gray-100">
 
-    <!-- Sidebar -->
-    @include('layouts.sidebar')
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
@@ -82,6 +80,34 @@
                     </tbody>
                 </table>
             </div>
+
+@can('create', App\Models\Member::class)
+    <a href="{{ route('members.create') }}" class="btn btn-primary">Add Member</a>
+@endcan
+
+<table class="min-w-full mt-4">
+    <!-- ... -->
+    @foreach($members as $member)
+        <tr>
+            <td>{{ $member->name }} {{ $member->surname }}</td>
+            <td>{{ optional($member->homecell)->name }}</td>
+            <td>{{ optional($member->ministry)->name }}</td>
+            <td class="text-right">
+                @can('update', $member)
+                    <a href="{{ route('members.edit', $member) }}" class="link">Edit</a>
+                @endcan
+                @can('delete', $member)
+                    <form action="{{ route('members.destroy', $member) }}" method="POST" class="inline">
+                        @csrf @method('DELETE')
+                        <button class="text-red-600 ml-2" onclick="return confirm('Delete this member?')">Delete</button>
+                    </form>
+                @endcan
+            </td>
+        </tr>
+    @endforeach
+</table>
+
+
         </main>
 
         <!-- Footer -->

@@ -2,63 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ministry;
 use Illuminate\Http\Request;
 
 class MinistryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+public function index()
+{
+    $ministries = Ministry::latest()->paginate(10); // fetch ministries
+    return view('ministries.index', compact('ministries')); // pass variable to view
+}
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
+
     public function create()
     {
-        //
+        return view('ministries.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        Ministry::create($data);
+
+        return redirect()->route('ministries.index')->with('success', 'Ministry added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Ministry $ministry)
     {
-        //
+        return view('ministries.edit', compact('ministry'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Ministry $ministry)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $ministry->update($data);
+
+        return redirect()->route('ministries.index')->with('success', 'Ministry updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Ministry $ministry)
     {
-        //
-    }
+        $ministry->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('ministries.index')->with('success', 'Ministry deleted successfully.');
     }
 }

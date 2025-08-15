@@ -45,6 +45,20 @@
                     @endforeach
                 </select>
             </div>
+
+            <div class="mb-3">
+    <label>Ministry</label>
+    <select name="ministry_id" class="form-control">
+        <option value="">-- Select Ministry --</option>
+        @foreach($ministries as $ministry)
+            <option value="{{ $ministry->id }}" 
+                {{ $member->ministry_id == $ministry->id ? 'selected' : '' }}>
+                {{ $ministry->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
             <div>
                 <label class="block font-medium text-gray-700">Picture</label>
                 <input type="file" name="picture" class="mt-1 block w-full">

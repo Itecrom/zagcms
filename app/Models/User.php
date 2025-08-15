@@ -2,30 +2,45 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
 
+    // make sure these exist in your table or are fillable via seeding
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'phone',
+        'name','email','phone','password','role','homecell_id','ministry_id'
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password','remember_token'];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function homecell()
+    {
+        return $this->belongsTo(Homecell::class);
+    }
+
+    public function ministry()
+    {
+        return $this->belongsTo(Ministry::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isHomecellPastor(): bool
+    {
+        return $this->role === 'homecell_pastor';
+    }
+
+    public function isMinistryLeader(): bool
+    {
+        return $this->role === 'ministry_leader';
+    }
+
+    
 }

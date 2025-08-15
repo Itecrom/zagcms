@@ -1,49 +1,93 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\HomecellController;
 use App\Http\Controllers\MinistryController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\FamilyController;
-use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
-// Guest routes (login, register, password reset)
-require __DIR__.'/auth.php';
 
-// Dashboard route
-Route::middleware('auth')->group(function () {
+
+Route::resource('users', UserController::class)->middleware('auth');
+Route::resource('ministries', MinistryController::class);
+
+
+/*
+|--------------------------------------------------------------------------
+| Guest Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::resource('users', UserController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('users', UserController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Profile routes
+    // Members CRUD
+    Route::resource('members', MemberController::class);
+
+    // Homecells CRUD
+    Route::resource('homecells', HomecellController::class);
+
+    // Ministries CRUD (Super Admin will see via Blade condition)
+    Route::resource('ministries', MinistryController::class);
+
+    // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Super Admin routes
-    Route::middleware('role:super_admin')->group(function () {
-        Route::resource('homecells', HomecellController::class);
-        Route::resource('ministries', MinistryController::class);
-        Route::resource('members', MemberController::class);
-        Route::resource('families', FamilyController::class);
-        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    });
+    // Email Verification
+    Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
-    // Homecell Pastor routes
-    Route::middleware('role:homecell_pastor')->group(function () {
-        Route::resource('homecells', HomecellController::class)->only(['index', 'show']);
-        Route::resource('members', MemberController::class)->only(['index', 'show']);
-    });
+    // Password Confirm & Update
+    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
+    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
-    Route::middleware(['auth'])->group(function () {
-    Route::resource('members', MemberController::class);
-});
-
-
-    // Ministry Leader routes
-    Route::middleware('role:ministry_leader')->group(function () {
-        Route::resource('ministries', MinistryController::class)->only(['index', 'show']);
-        Route::resource('members', MemberController::class)->only(['index', 'show']);
-    });
+    // Logout
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
