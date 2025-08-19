@@ -38,17 +38,17 @@
                 <input type="text" name="phone" value="{{ old('phone') }}" class="w-full border rounded px-3 py-2">
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-        <label class="block font-semibold mb-1">Home of Origin</label>
-        <input type="text" name="home_of_origin" value="{{ old('home_of_origin') }}" class="w-full border rounded px-3 py-2">
-    </div>
-    <div>
-        <label class="block font-semibold mb-1">Residential Home</label>
-        <input type="text" name="residential_home" value="{{ old('residential_home') }}" class="w-full border rounded px-3 py-2">
-    </div>
-</div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-semibold mb-1">Home of Origin</label>
+                <input type="text" name="home_of_origin" value="{{ old('home_of_origin') }}" class="w-full border rounded px-3 py-2">
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Residential Home</label>
+                <input type="text" name="residential_home" value="{{ old('residential_home') }}" class="w-full border rounded px-3 py-2">
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -91,26 +91,23 @@
             <input type="file" name="picture" class="w-full">
         </div>
 
-        {{-- Boolean fields with hidden inputs to ensure true/false values --}}
-        <div class="flex space-x-6 items-center">
-            <label class="flex items-center space-x-2">
-                <input type="hidden" name="active" value="0">
-                <input type="checkbox" name="active" value="1" {{ old('active') ? 'checked' : '' }} class="form-checkbox">
-                <span>Active</span>
+        {{-- Status radio buttons --}}
+        <div class="flex gap-6 mt-4 items-center">
+            <label>
+                <input type="radio" name="status" value="active" {{ old('status') == 'active' ? 'checked' : '' }}>
+                Active
             </label>
-            <label class="flex items-center space-x-2">
-                <input type="hidden" name="transferred" value="0">
-                <input type="checkbox" name="transferred" value="1" {{ old('transferred') ? 'checked' : '' }} class="form-checkbox">
-                <span>Transferred</span>
+            <label>
+                <input type="radio" name="status" value="transferred" {{ old('status') == 'transferred' ? 'checked' : '' }}>
+                Transferred
             </label>
-            <label class="flex items-center space-x-2">
-                <input type="hidden" name="deceased" value="0">
-                <input type="checkbox" name="deceased" value="1" {{ old('deceased') ? 'checked' : '' }} class="form-checkbox">
-                <span>Deceased</span>
+            <label>
+                <input type="radio" name="status" value="deceased" {{ old('status') == 'deceased' ? 'checked' : '' }}>
+                Deceased
             </label>
         </div>
 
-        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500">
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500 mt-6">
             Add Member
         </button>
     </form>

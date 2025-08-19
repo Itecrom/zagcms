@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($ministries as $ministry)
+            @forelse($ministries as $ministry)
             <tr>
                 <td class="border px-4 py-2">{{ $ministry->id }}</td>
                 <td class="border px-4 py-2">{{ $ministry->name }}</td>
@@ -34,7 +34,11 @@
                     </form>
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="4" class="border px-4 py-2 text-center text-gray-500">No ministries found.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 

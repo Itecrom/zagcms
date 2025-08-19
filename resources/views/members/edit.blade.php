@@ -45,20 +45,6 @@
                     @endforeach
                 </select>
             </div>
-
-            <div class="mb-3">
-    <label>Ministry</label>
-    <select name="ministry_id" class="form-control">
-        <option value="">-- Select Ministry --</option>
-        @foreach($ministries as $ministry)
-            <option value="{{ $ministry->id }}" 
-                {{ $member->ministry_id == $ministry->id ? 'selected' : '' }}>
-                {{ $ministry->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
             <div>
                 <label class="block font-medium text-gray-700">Picture</label>
                 <input type="file" name="picture" class="mt-1 block w-full">
@@ -74,15 +60,32 @@
                 <label class="block font-medium text-gray-700">Employment Status</label>
                 <input type="text" name="employment_status" value="{{ old('employment_status', $member->employment_status ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
             </div>
-            <div class="col-span-2 flex items-center gap-4">
-                <label><input type="checkbox" name="active" {{ old('active', $member->active ?? false) ? 'checked' : '' }}> Active</label>
-                <label><input type="checkbox" name="transferred" {{ old('transferred', $member->transferred ?? false) ? 'checked' : '' }}> Transferred</label>
-                <label><input type="checkbox" name="deceased" {{ old('deceased', $member->deceased ?? false) ? 'checked' : '' }}> Deceased</label>
+
+            <!-- Status Radio Buttons -->
+            <div class="col-span-2 mt-4">
+                <label class="block font-medium text-gray-700 mb-2">Status</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-1">
+                        <input type="radio" name="status" value="active" 
+                            {{ old('status', isset($member) ? ($member->active ? 'active' : ($member->transferred ? 'transferred' : ($member->deceased ? 'deceased' : ''))) : '') === 'active' ? 'checked' : '' }}>
+                        Active
+                    </label>
+                    <label class="flex items-center gap-1">
+                        <input type="radio" name="status" value="transferred" 
+                            {{ old('status', isset($member) ? ($member->active ? 'active' : ($member->transferred ? 'transferred' : ($member->deceased ? 'deceased' : ''))) : '') === 'transferred' ? 'checked' : '' }}>
+                        Transferred
+                    </label>
+                    <label class="flex items-center gap-1">
+                        <input type="radio" name="status" value="deceased" 
+                            {{ old('status', isset($member) ? ($member->active ? 'active' : ($member->transferred ? 'transferred' : ($member->deceased ? 'deceased' : ''))) : '') === 'deceased' ? 'checked' : '' }}>
+                        Deceased
+                    </label>
+                </div>
             </div>
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="px-4 py-2 bg-#D1A300 text-white rounded hover:bg-yellow-500">
+            <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-500">
                 {{ isset($member) ? 'Update Member' : 'Add Member' }}
             </button>
         </div>

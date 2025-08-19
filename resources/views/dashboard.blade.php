@@ -3,14 +3,6 @@
 @section('content')
 <div class="p-6 space-y-8">
 
-    <!-- Clock Display 
-    <div class="flex justify-end">
-        <div class="bg-white shadow-lg rounded-xl p-4 text-center w-40">
-            <div class="text-gray-500 text-xs">Current Time</div>
-            <div id="clock" class="text-2xl font-bold text-blue-700"></div>
-        </div>
-    </div>-->
-
     <!-- Top Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl shadow-lg p-5 flex items-center space-x-4">
@@ -43,18 +35,6 @@
         </div>
     </div>
 
-    <!-- Export Buttons -->
-<div class="flex flex-wrap justify-end gap-3">
-    <a href="{{ route('export.members.excel', ['filter' => request('filter'), 'value' => request('value')]) }}" 
-       class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow">
-       <i class="fas fa-file-excel"></i> Export Excel
-    </a>
-    <a href="{{ route('export.members.pdf', ['filter' => request('filter'), 'value' => request('value')]) }}" 
-       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow">
-       <i class="fas fa-file-pdf"></i> Export PDF
-    </a>
-</div>
-
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -71,20 +51,30 @@
         </div>
     </div>
 
+    <!-- Birthday Section -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+        <h2 class="text-lg font-semibold mb-4">Birthdays This Month</h2>
+        @if($birthdaysThisMonth->isEmpty())
+            <p class="text-gray-500">No birthdays this month.</p>
+        @else
+        <ul class="divide-y divide-gray-200">
+            @foreach($birthdaysThisMonth as $member)
+               <li class="py-2 flex justify-between items-center">
+                <span>{{ $member->name }} {{ $member->surname }}</span>
+                <span class="text-sm text-gray-400">{{ $member->formatted_dob }}</span>
+            </li>
+            @endforeach
+
+            </ul>
+        @endif
+    </div>
+
 </div>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    function updateClock() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        document.getElementById('clock').textContent = timeString;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // Data for charts
+    // Chart data
     const ministryLabels = @json($membersByMinistry->pluck('name'));
     const ministryData = @json($membersByMinistry->pluck('members_count'));
 
@@ -102,9 +92,12 @@
             datasets: [{
                 label: 'Members',
                 data: ministryData,
-                backgroundColor: '#3b82f6'
+                backgroundColor: ministryLabels.map(() => 'rgba(59, 130, 246, 0.7)'),
+                borderColor: ministryLabels.map(() => 'rgba(59, 130, 246, 1)'),
+                borderWidth: 1
             }]
-        }
+        },
+        options: { responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } }
     });
 
     // Homecell Chart
@@ -115,9 +108,12 @@
             datasets: [{
                 label: 'Members',
                 data: homecellData,
-                backgroundColor: '#8b5cf6'
+                backgroundColor: homecellLabels.map(() => 'rgba(139, 92, 246, 0.7)'),
+                borderColor: homecellLabels.map(() => 'rgba(139, 92, 246, 1)'),
+                borderWidth: 1
             }]
-        }
+        },
+        options: { responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } }
     });
 
     // Age Group Chart
@@ -130,7 +126,8 @@
                 data: ageData,
                 backgroundColor: ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa']
             }]
-        }
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' }, tooltip: { enabled: true } } }
     });
 </script>
 @endsection

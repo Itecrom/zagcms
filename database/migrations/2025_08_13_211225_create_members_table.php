@@ -12,22 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('members', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->string('surname');
-    $table->date('dob');
-    $table->string('home_of_origin');
-    $table->string('residential_home');
-    $table->foreignId('homecell_id')->constrained();
-    $table->foreignId('ministry_id')->constrained();
-    $table->string('picture')->nullable();
-    $table->string('marital_status')->nullable();
-    $table->string('employment_status')->nullable();
-    $table->string('phone')->nullable();
-    $table->boolean('active')->default(false)->change();
-    $table->boolean('transferred')->default(false)->change();
-    $table->boolean('deceased')->default(false)->change();
-    $table->timestamps();
+            $table->id();
+            $table->string('name');
+            $table->string('surname');
+            $table->date('dob');
+            $table->string('home_of_origin');
+            $table->string('residential_home');
+            $table->foreignId('homecell_id')->constrained();
+            $table->foreignId('ministry_id')->constrained();
+            $table->string('picture')->nullable();
+            $table->string('marital_status')->nullable();
+            $table->string('employment_status')->nullable();
+            $table->string('phone')->nullable();
+            $table->boolean('active')->default(false);
+            $table->boolean('transferred')->default(false);
+            $table->boolean('deceased')->default(false);
+            $table->timestamps();
         });
     }
 

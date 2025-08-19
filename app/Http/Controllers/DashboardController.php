@@ -27,15 +27,27 @@ class DashboardController extends Controller
 
         // Members by age group
         $ageGroups = [
-            'Under 18' => Member::whereDate('dob', '>', Carbon::now()->subYears(18))->count(),
-            '18-25' => Member::whereDate('dob', '<=', Carbon::now()->subYears(18))
-                             ->whereDate('dob', '>', Carbon::now()->subYears(25))->count(),
-            '26-35' => Member::whereDate('dob', '<=', Carbon::now()->subYears(25))
-                             ->whereDate('dob', '>', Carbon::now()->subYears(35))->count(),
-            '36-50' => Member::whereDate('dob', '<=', Carbon::now()->subYears(35))
-                             ->whereDate('dob', '>', Carbon::now()->subYears(50))->count(),
-            '51+' => Member::whereDate('dob', '<=', Carbon::now()->subYears(50))->count(),
+            '0-17' => 0,
+            '18-25' => 0,
+            '26-35' => 0,
+            '36-50' => 0,
+            '51+' => 0,
         ];
+        foreach (Member::all() as $member) {
+            $age = now()->diffInYears(Carbon::parse($member->dob));
+            if ($age <= 17) $ageGroups['0-17']++;
+            elseif ($age <= 25) $ageGroups['18-25']++;
+            elseif ($age <= 35) $ageGroups['26-35']++;
+            elseif ($age <= 50) $ageGroups['36-50']++;
+            else $ageGroups['51+']++;
+        }
+
+        // Birthdays this month
+        $currentMonth = Carbon::now()->month;
+        $birthdaysThisMonth = Member::whereMonth('dob', $currentMonth)->get()->map(function($member) {
+            $member->formatted_dob = Carbon::parse($member->dob)->format('d M'); // format day nicely
+            return $member;
+        });
 
         return view('dashboard', compact(
             'totalUsers',
@@ -44,7 +56,8 @@ class DashboardController extends Controller
             'totalMinistries',
             'membersByMinistry',
             'membersByHomecell',
-            'ageGroups'
+            'ageGroups',
+            'birthdaysThisMonth' // pass to view
         ));
     }
 }

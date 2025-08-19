@@ -1,30 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-3xl mx-auto bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Add Homecell</h1>
+<div class="max-w-3xl mx-auto p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-6">{{ isset($homecell) ? 'Edit Homecell' : 'Add New Homecell' }}</h1>
 
-    <form action="{{ route('homecells.store') }}" method="POST">
+    @if($errors->any())
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            <ul class="list-disc pl-5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ isset($homecell) ? route('homecells.update', $homecell->id) : route('homecells.store') }}" method="POST">
         @csrf
+        @if(isset($homecell))
+            @method('PUT')
+        @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block font-medium text-gray-700">Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" class="mt-1 block w-full border-gray-300 rounded" required>
-            </div>
-            <div>
-                <label class="block font-medium text-gray-700">Leader</label>
-                <input type="text" name="leader" value="{{ old('leader') }}" class="mt-1 block w-full border-gray-300 rounded">
-            </div>
-            <div class="col-span-2">
-                <label class="block font-medium text-gray-700">Description</label>
-                <textarea name="description" class="mt-1 block w-full border-gray-300 rounded" rows="4">{{ old('description') }}</textarea>
-            </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Name</label>
+            <input type="text" name="name" value="{{ old('name', $homecell->name ?? '') }}" class="w-full border rounded px-3 py-2" required>
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500">Add Homecell</button>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Leader</label>
+            <input type="text" name="leader" value="{{ old('leader', $homecell->leader ?? '') }}" class="w-full border rounded px-3 py-2">
         </div>
+
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Description</label>
+            <textarea name="description" class="w-full border rounded px-3 py-2" rows="4">{{ old('description', $homecell->description ?? '') }}</textarea>
+        </div>
+
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500">
+            {{ isset($homecell) ? 'Update Homecell' : 'Add Homecell' }}
+        </button>
     </form>
 </div>
 @endsection

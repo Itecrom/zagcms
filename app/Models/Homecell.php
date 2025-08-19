@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Homecell extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'leader',      // Add this
+        'description', // Add this
+    ];
 
     public function members()
     {
@@ -17,4 +21,5 @@ class Homecell extends Model
     {
         return $this->hasMany(User::class);
     }
+    
 }

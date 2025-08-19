@@ -10,20 +10,25 @@ use PDF;
 
 class MemberExportController extends Controller
 {
-    // Export to Excel
+    /**
+     * Export members to Excel.
+     */
     public function exportExcel(Request $request)
     {
-        $filter = $request->filter; // e.g., ministry, homecell, age_group
-        $value = $request->value;   // e.g., ministry_id, homecell_id, or '18-25'
+        $filter = $request->input('filter'); // ministry, homecell, age_group
+        $value  = $request->input('value');  // corresponding value
 
+        // Use MembersExport class to handle filtered data
         return Excel::download(new MembersExport($filter, $value), 'members.xlsx');
     }
 
-    // Export to PDF
+    /**
+     * Export members to PDF.
+     */
     public function exportPDF(Request $request)
     {
-        $filter = $request->filter;
-        $value = $request->value;
+        $filter = $request->input('filter');
+        $value  = $request->input('value');
 
         $members = $this->getFilteredMembers($filter, $value);
 
@@ -31,19 +36,27 @@ class MemberExportController extends Controller
         return $pdf->download('members.pdf');
     }
 
-    // Helper to reuse filter logic
+    /**
+     * Helper method to apply filter logic.
+     */
     private function getFilteredMembers($filter, $value)
     {
         $query = Member::with(['ministry', 'homecell']);
 
         if ($filter && $value) {
-            if ($filter === 'ministry') {
-                $query->where('ministry_id', $value);
-            } elseif ($filter === 'homecell') {
-                $query->where('homecell_id', $value);
-            } elseif ($filter === 'age_group') {
-                [$min, $max] = explode('-', $value);
-                $query->whereBetween('age', [(int) $min, (int) $max]);
+            switch ($filter) {
+                case 'ministry':
+                    $query->where('ministry_id', $value);
+                    break;
+                case 'homecell':
+                    $query->where('homecell_id', $value);
+                    break;
+                case 'age_group':
+                    if (strpos($value, '-') !== false) {
+                        [$min, $max] = explode('-', $value);
+                        $query->whereBetween('age', [(int) $min, (int) $max]);
+                    }
+                    break;
             }
         }
 

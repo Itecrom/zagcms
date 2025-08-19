@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 
 class HomecellController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
-        $homecells = Homecell::latest()->paginate(10);
+        // All users see all homecells
+        $homecells = Homecell::latest()->paginate(12);
+
         return view('homecells.index', compact('homecells'));
     }
 
@@ -22,13 +29,12 @@ class HomecellController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'leader' => 'nullable|string|max:255',
             'description' => 'nullable|string',
         ]);
 
         Homecell::create($data);
 
-        return redirect()->route('homecells.index')->with('success', 'Homecell added successfully.');
+        return redirect()->route('homecells.index')->with('success', 'Homecell created successfully.');
     }
 
     public function edit(Homecell $homecell)
@@ -40,7 +46,6 @@ class HomecellController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'leader' => 'nullable|string|max:255',
             'description' => 'nullable|string',
         ]);
 

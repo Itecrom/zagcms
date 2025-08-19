@@ -7,13 +7,17 @@ use Illuminate\Http\Request;
 
 class MinistryController extends Controller
 {
-public function index()
-{
-    $ministries = Ministry::latest()->paginate(10); // fetch ministries
-    return view('ministries.index', compact('ministries')); // pass variable to view
-}
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
+    public function index(Request $request)
+    {
+        $ministries = Ministry::latest()->paginate(12);
 
+        return view('ministries.index', compact('ministries'));
+    }
 
     public function create()
     {
@@ -29,7 +33,7 @@ public function index()
 
         Ministry::create($data);
 
-        return redirect()->route('ministries.index')->with('success', 'Ministry added successfully.');
+        return redirect()->route('ministries.index')->with('success', 'Ministry created successfully.');
     }
 
     public function edit(Ministry $ministry)

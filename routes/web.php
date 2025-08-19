@@ -18,23 +18,9 @@ use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemberExportController;
 
-
-
-Route::resource('users', UserController::class)->middleware('auth');
-Route::resource('ministries', MinistryController::class);
-Route::resource('members', MemberController::class);
-Route::resource('homecells', HomecellController::class)->middleware('auth');
-Route::get('/export/members/excel', [MemberExportController::class, 'exportExcel'])->name('export.members.excel');
-Route::get('/export/members/pdf', [MemberExportController::class, 'exportPDF'])->name('export.members.pdf');
-
-
-
-
-/*
-|--------------------------------------------------------------------------
-| Guest Routes
-|--------------------------------------------------------------------------
-*/
+// ---------------------
+// Guest Routes
+// ---------------------
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
@@ -49,43 +35,42 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:super_admin'])->group(function () {
-    Route::resource('users', UserController::class);
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::resource('users', UserController::class);
-});
-
-Route::middleware(['auth'])->group(function () {
+// ---------------------
+// Authenticated Routes
+// ---------------------
+Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     // Members CRUD
     Route::resource('members', MemberController::class);
+
+    // Members Export
+    Route::get('members/export/excel', [MemberExportController::class, 'exportExcel'])
+        ->name('members.exportExcel');
+    Route::get('members/export/pdf', [MemberExportController::class, 'exportPDF'])
+        ->name('members.exportPDF');
 
     // Homecells CRUD
     Route::resource('homecells', HomecellController::class);
 
-    // Ministries CRUD (Super Admin will see via Blade condition)
+    // Ministries CRUD
     Route::resource('ministries', MinistryController::class);
-    
 
-    // Profile Routes
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+    // Users
+    Route::middleware(['auth'])->group(function () {
+    Route::resource('users', UserController::class);});
 
     // Email Verification
-    Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    Route::get('verify-email', [EmailVerificationPromptController::class, '__invoke'])
+        ->name('verification.notice');
+    Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
@@ -99,5 +84,4 @@ Route::middleware(['auth'])->group(function () {
 
     // Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
 });
